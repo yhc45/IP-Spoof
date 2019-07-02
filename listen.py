@@ -37,7 +37,7 @@ def listen_port(src_ip,src_port):
       packet_type = "SYN ACK"
     else:
       packet_type = "Unknown"
-    print("recieving {}:\nip_id:{}     ip:{}".format(packet_type,ip_id,src_ip))
+    print("recieving {}:\nip_id:{}     ip:{}\n".format(packet_type,ip_id,src_ip[0]))
   else:
     print("recieve from {}".format(src_ip))
     print(raw_packet)
