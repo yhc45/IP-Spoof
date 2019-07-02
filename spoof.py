@@ -1,7 +1,8 @@
-#!/usr/bin/python
+#/usr/bin/python
 import socket, struct
 
 src_ip = "192.168.100.135" #my ip address
+src_lport = 54000
 #src_ip = "127.0.0.1"
 dst_ip = "216.58.193.196"
 ip_header = ""
@@ -82,7 +83,7 @@ def send_packet(dst_ip, dst_port):
     print("Error creating socket in send_raw_syn\n")
     print(e)
   src_addr = src_ip
-  src_port = 54111
+  src_port = src_lport
   #test for bind device, doesn't need it after changing socket type to PROTO_RAW
   #s.bind(('ens33',0x800))
   make_tcpheader = TCPHeader(src_port,dst_port)
@@ -100,5 +101,7 @@ def send_packet(dst_ip, dst_port):
   except Exception as e: 
     print("Error utilizing raw socket in send_raw_syn\n")
     print(e)
+
+  
 
 send_packet(dst_ip,443)
