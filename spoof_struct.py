@@ -95,4 +95,3 @@ def send_packet(src_ip, src_port, dst_ip, dst_port,syn = 1,ack = 0):
     print("Error utilizing raw socket in send_raw_syn\n")
     print(e)
   
-send_packet("192.168.100.135",54001,"216.58.193.196",443,1,1)
