@@ -1,8 +1,8 @@
-#/usr/bin/python
+#!/usr/bin/python
 import socket, struct
 
 src_ip = "192.168.100.135" #my ip address
-src_lport = 54000
+src_lport = 34980
 #src_ip = "127.0.0.1"
 dst_ip = "216.58.193.196"
 ip_header = ""
