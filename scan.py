@@ -5,7 +5,7 @@ import time
 
 common_ports = [1,5,7,18,20,21,22,233,25,29,37,42,43,49,53,69,70,79,80,103,\
              108,109,110,115,118,119,137,139,143,150,156,161,179,190,194,197,\
-             389,396,443,444,445,458,546,547,563,569,1080] 
+             389,396,443,444,445,458,546,547,563,569,1080]
 src_ip = '192.168.100.128'
 src_port = 54002
 pcap_name = "capture.pcap"
@@ -20,8 +20,12 @@ def parse_pcap(file_n,port):
     eth = dpkt.ethernet.Ethernet(buf)
     ip = eth.data
     tcp = ip.data
-    if eth.type == dpkt.ethernet.ETH_TYPE_IP and tcp.dport == port:
-      result.append(socket.inet_ntoa(ip.dst))
+    if eth.type == dpkt.ethernet.ETH_TYPE_IP and tcp.dport == src_port and tcp.sport == port:
+      result.append(socket.inet_ntoa(ip.src))
+    else
+      print("*************potential abnormal behavior*********")
+      print(socket.inet_ntoa(ip.src))
+      print(tcp.sport)
   f.close()
   return result
 
@@ -53,7 +57,7 @@ def main():
       rem_ip = [x for x in rem_ip if x not in ip_res]
       result_temp = [(x,curr_port) for x in ip_res]
       result += result_temp
-    else: 
+    else:
       result_temp = [(x,None) for x in rem_ip]
   f = open("result_prob.txt","w+")
   for ip, port in result:
