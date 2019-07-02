@@ -28,7 +28,7 @@ class TCPHeader():
     self.order = "!HHLLBBHHH" 
     #size of tcp header; size is specified by 4-byte words; 
     #5 words * 4 bytes is 20bytes minimum length of tcp header
-    self.data_offset = 0xa0
+    self.data_offset = 0x50
     #following fields doesn't matter
     self.src_port = src_port 
     self.dst_port = dst_port
@@ -67,9 +67,13 @@ def tcp_checksum(source_ip,dest_ip,tcp_header,user_data=''):
   ihl_ver = (4 << 4) | 5
   ident = 54321
   ip_header = struct.pack('!BBHHHBBH4s4s',ihl_ver, 0, tcp_length, ident, 0x4000, 64, 6, 0, saddr, daddr)
+  pseudo_header = gen_pseudo_header(saddr,daddr,0,6,tcp_length)
   #Assemble the packet (IP Header + TCP Header + data, and then send it to checksum function)
-  packet = ip_header + tcp_header + user_data 
+  packet = pseudo_header + tcp_header + user_data 
   return checksum(packet)
+
+def gen_pseudo_header(src_ip,dst_ip,reserved,protocol,length):
+  return struct.pack('!4s4sBBH',src_ip,dst_ip,reserved,protocol,length)
 
 def send_packet(dst_ip, dst_port):
   global ip_header
@@ -94,7 +98,8 @@ def send_packet(dst_ip, dst_port):
 
   #finalize packet
   #append optional part for server to reply (mimiced from browser)
-  packet = ip_header + packet + "\x02\x04\x05\xb4\x04\x02\x08\x0a\x4f\xa7\xbe\x47\x00\x00\x00\x00\x01\x03\x03\x07"
+  packet = ip_header + packet
+  # + "\x02\x04\x05\xb4\x04\x02\x08\x0a\x4f\xa7\xbe\x47\x00\x00\x00\x00\x01\x03\x03\x07"
   print("SEND: SYN packet from {}:{} to {}:{}\n".format(src_ip,src_port,dst_ip,dst_port))
   try: 
     s.sendto(packet,(dst_ip,dst_port))
