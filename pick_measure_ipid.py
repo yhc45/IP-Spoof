@@ -1,12 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 from spoof_struct import send_packet
 import dpkt, socket, subprocess
 from collections import defaultdict
 import time
 import cPickle as pickle
+import itertools
 
 src_ip = '192.168.100.128'
-spoof_ip = ''
+spoof_ip = '192.168.22.21'
 src_port = 54024
 pcap_name = "filter.pcap"
 ipid_map=defaultdict(lambda:[])
@@ -34,15 +35,25 @@ def parse_candidate(file_name):
 def main():
   parse_ip = parse_candidate("ip_port_record.pickle")
   #ip = subprocess.Popen(['tcpdump', '-s','0', '-i', 'ens33',
-       '-w', pcap_name, "port", str(src_port)], stdout=subprocess.PIPE)
+  #     '-w', pcap_name, "port", str(src_port)], stdout=subprocess.PIPE)
   time.sleep(2)
+  beg_ind = 0
+  end_ind = 1000
+
   for i in range(30):
-    for ip, port in parse_ip.items():
+    start = time.time()
+    for ip, port in itertools.islice(parse_ip.items(),beg_ind, end_ind):
+      send_packet(spoof_ip,src_port,ip,port,1,1)
+    elapse = time.time() - start
+    print(elapse)
+
+  #for i in range(30):
+  #  for ip, port in parse_ip.items():
       #send_packet(src_ip,src_port,ip,port,1,1)
-      #send_packet(spoof_ip,src_port,ip,port,1,1)
-      print("ip: "+ip+" id: "+str(port)+"\n")
-    exit(1)
-    time.sleep(1)
+  #    send_packet(spoof_ip,src_port,ip,port,1,1)
+  #    print("ip: "+ip+" id: "+str(port)+"\n")
+  #  exit(1)
+  #  time.sleep(1)
 
   #p.send_signal(subprocess.signal.SIGTERM)
   #time.sleep(1)
