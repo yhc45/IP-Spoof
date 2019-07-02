@@ -7,5 +7,8 @@ scan.py: main program to do the scan
 
 run the following
 ```
+./update_list.sh
 sudo ./scan.py
 ```
+
+"result.txt" will be generated with (*ip*,*port*)
