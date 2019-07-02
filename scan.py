@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from listen import listen_port
 from spoof_struct import send_packet
 import dpkt, socket, subprocess
 import time
