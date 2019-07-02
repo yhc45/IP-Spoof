@@ -1,27 +1,23 @@
 #!/usr/bin/python
 import socket, struct
 
-src_ip = "192.168.100.135" #my ip address
-src_lport = 54000
-#src_ip = "127.0.0.1"
-dst_ip = "216.58.193.196"
-ip_header = ""
+NO_FRAG = 2
 
-#generate checksum for tcp, alg is found @ Silver Moon, binarytides
-def checksum(msg):
-  sum = 0
-  for i in range(0,len(msg),2):
-    w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
-    sum = sum + w
+#IPHeader for spoofing and checksum calculation
+class IPHeader():
+  def __init__(self,src_ip,dst_ip,payload_len,flag, fragment = 0,  protocol = 6, TTL = 64, iden = 54321 ,ihl_ver=((4 << 4) | 5)):
+    self.src_ip = socket.inet_aton(src_ip)
+    self.dst_ip = socket.inet_aton(dst_ip)
+    self.pseudo_order = "!4s4sBBH"
+    self.order = "!BBHHHBBH4s4s"
+    self.flag_off = (flag << 13) | fragment
+    self.pseudo_header = struct.pack(self.pseudo_order,self.src_ip,self.dst_ip,0,protocol,payload_len)
+    self.header = struct.pack('!BBHHHBBH4s4s',ihl_ver, 0, payload_len, iden, self.flag_off, TTL, protocol, 0, self.src_ip, self.dst_ip)
 
-  sum = (sum>>16) + (sum & 0xffff)
-  sum = sum + (sum >> 16)
-  sum = ~sum & 0xffff
-  return sum
 
 #TCPHeader class
 class TCPHeader():
-  def __init__(self,src_port,dst_port):
+  def __init__(self,src_port,dst_port,syn,ack,rst,fin):
     #notes sample header:src_port=47123,dst_port=80,seqnum=1000,acknum=0,data_offset=80,fin=0,syn=1,rst=0,psh=0,ack=0,urg=0,window=5840,check=0,urg_ptr=0
 
     #!=network(big-endian), H=short(2), L=long(4),B=char(1) 
@@ -36,47 +32,39 @@ class TCPHeader():
     self.acknum = 0
     self.window = 29200 #socket.htons(5840) #server's window size is 5840  
     self.fin = 0 
-    self.syn = 1
-    self.rst = 0 
+    self.syn = syn
+    self.rst = rst
     self.psh = 0 
-    self.ack = 0 
+    self.ack = ack
     self.urg = 0
-    self.check = 0
+    self.check = False
     self.urg_ptr = 0
+    self.packet = ""
   # to generate tcp_header assign flags
   def flags(self):
     return self.fin + (self.syn << 1) + (self.rst << 2) + (self.psh <<3) + (self.ack << 4) + (self.urg << 5)
   # generate the struc for TCP
   # 2 cases, first being checksum is calculated, latter being it hasn't
   def gen_struct(self, check=False):
-    if check:
-      self.check = check
-      return struct.pack('!HHLLBBH',self.src_port,self.dst_port,self.seqnum,self.acknum,self.data_offset,self.flags(),self.window)+struct.pack('H',self.check)+struct.pack('!H',self.urg_ptr)
+    if self.check:
+      self.packet = struct.pack('!HHLLBBH',self.src_port,self.dst_port,self.seqnum,self.acknum,self.data_offset,self.flags(),self.window)+struct.pack('H',self.check)+struct.pack('!H',self.urg_ptr)
     else:
-      return struct.pack(self.order,self.src_port,self.dst_port,self.seqnum,self.acknum,self.data_offset,self.flags(),self.window,self.check,self.urg_ptr)
+      self.packet = struct.pack(self.order,self.src_port,self.dst_port,self.seqnum,self.acknum,self.data_offset,self.flags(),self.window,self.check,self.urg_ptr)
+  #generate checksum for tcp, alg is found @ Silver Moon, binarytides
+  def checksum(self):
+    msg = self.packet
+    sum = 0
+    for i in range(0,len(msg),2):
+      w = ord(msg[i]) + (ord(msg[i+1]) << 8 )
+      sum = sum + w
 
-#calculate tcp checksum
-def tcp_checksum(source_ip,dest_ip,tcp_header,user_data=''):
-  #Calculates the correct checksum for the tcp header
-  global ip_header
-  #populate the field for TCP header
-  tcp_length = len(tcp_header) + len(user_data)
-  print(tcp_length)
-  saddr = socket.inet_aton(source_ip)
-  daddr = socket.inet_aton(dest_ip)
-  ihl_ver = (4 << 4) | 5
-  ident = 54321
-  ip_header = struct.pack('!BBHHHBBH4s4s',ihl_ver, 0, tcp_length, ident, 0x4000, 64, 6, 0, saddr, daddr)
-  pseudo_header = gen_pseudo_header(saddr,daddr,0,6,tcp_length)
-  #Assemble the packet (IP Header + TCP Header + data, and then send it to checksum function)
-  packet = pseudo_header + tcp_header + user_data 
-  return checksum(packet)
+    sum = (sum>>16) + (sum & 0xffff)
+    sum = sum + (sum >> 16)
+    sum = ~sum & 0xffff
+    self.check = sum
 
-def gen_pseudo_header(src_ip,dst_ip,reserved,protocol,length):
-  return struct.pack('!4s4sBBH',src_ip,dst_ip,reserved,protocol,length)
 
-def send_packet(dst_ip, dst_port):
-  global ip_header
+def send_packet(src_ip, src_port, dst_ip, dst_port,syn = 1,ack = 0):
   #open socket
   #Use raw sockets to send a SYN packet.
   #PRTOCOL_RAW allows customize IP header
@@ -86,27 +74,25 @@ def send_packet(dst_ip, dst_port):
   except Exception as e:
     print("Error creating socket in send_raw_syn\n")
     print(e)
-  src_addr = src_ip
-  src_port = src_lport
   #test for bind device, doesn't need it after changing socket type to PROTO_RAW
   #s.bind(('ens33',0x800))
-  make_tcpheader = TCPHeader(src_port,dst_port)
+  tcpheader = TCPHeader(src_port,dst_port,syn,ack,0,0)
   #generate initial TCP header
-  tcp_header = make_tcpheader.gen_struct()
-  #generate TCP header that has checksum
-  packet = make_tcpheader.gen_struct(check=tcp_checksum(src_addr,dst_ip,tcp_header))
+  tcpheader.gen_struct()
+  ipheader = IPHeader(src_ip,dst_ip,len(tcpheader.packet),NO_FRAG) 
+  tcpheader.packet = ipheader.pseudo_header + tcpheader.packet
+  tcpheader.checksum()
+  #generate header with correct checksum
+  tcpheader.gen_struct()
 
   #finalize packet
   #append optional part for server to reply (mimiced from browser)
-  packet = ip_header + packet
-  # + "\x02\x04\x05\xb4\x04\x02\x08\x0a\x4f\xa7\xbe\x47\x00\x00\x00\x00\x01\x03\x03\x07"
+  packet = ipheader.header + tcpheader.packet
   print("SEND: SYN packet from {}:{} to {}:{}\n".format(src_ip,src_port,dst_ip,dst_port))
   try: 
     s.sendto(packet,(dst_ip,dst_port))
   except Exception as e: 
     print("Error utilizing raw socket in send_raw_syn\n")
     print(e)
-
   
-
-send_packet(dst_ip,443)
+send_packet("192.168.100.135",54001,"216.58.193.196",443,1,1)
