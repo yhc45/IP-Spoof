@@ -1,13 +1,16 @@
 #!/usr/bin/python
 import socket
 
-def liste_port(src_port):
+def listen_port(src_port):
   ETH_P_ALL = 3
-  s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(ETH_P_ALL))
-  #device name is ens33
-  s.bind(('ens33',src_port))
+  #s = socket.socket(socket.AF_INET, socket.SOCK_RAW,socket.IPPROTO_RAW) 
+  s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
+
+  #device name is 
+  s.bind(('192.168.100.135',src_port))
+  #s.listen(0)
   while(True):
-    packet = s.recvfrom(65535).decode()
+    packet = s.recvfrom(65535)
     print(packet)
 
-liste_port(54000)
+listen_port(54000)
