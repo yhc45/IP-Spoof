@@ -5,7 +5,7 @@ import time
 
 src_ip = '192.168.100.128'
 spoof_ip = ''
-src_port = 54002
+src_port = 54024
 pcap_name = "filter.pcap"
 ipid_map={}
 
