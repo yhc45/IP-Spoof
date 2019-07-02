@@ -88,7 +88,7 @@ def send_packet(src_ip, src_port, dst_ip, dst_port,syn = 1,ack = 0):
   #finalize packet
   #append optional part for server to reply (mimiced from browser)
   packet = ipheader.header + tcpheader.packet
-  print("SEND: packet from {}:{} to {}:{}".format(src_ip,src_port,dst_ip,dst_port))
+  #print("SEND: packet from {}:{} to {}:{}".format(src_ip,src_port,dst_ip,dst_port))
   try: 
     s.sendto(packet,(dst_ip,dst_port))
   except Exception as e: 

@@ -37,15 +37,21 @@ def main():
   #ip = subprocess.Popen(['tcpdump', '-s','0', '-i', 'ens33',
   #     '-w', pcap_name, "port", str(src_port)], stdout=subprocess.PIPE)
   time.sleep(2)
-  beg_ind = 0
-  end_ind = 1000
-
-  for i in range(30):
-    start = time.time()
-    for ip, port in itertools.islice(parse_ip.items(),beg_ind, end_ind):
-      send_packet(spoof_ip,src_port,ip,port,1,1)
-    elapse = time.time() - start
-    print(elapse)
+  beg_ind = 0 
+  end_ind = 6300
+  start = 0
+  for p in range (131):
+    timestamps = []
+    for i in range(30):
+      timestamps.append(time.time())
+      for ip, port in itertools.islice(parse_ip.items(),beg_ind, end_ind):
+        send_packet(spoof_ip,src_port,ip,port,1,1)
+      if p == 130:
+        time.sleep(0.136)
+    result = [ timestamps[i+1]-timestamps[i] for i in range(29) ]
+    print(str(sum(result)/29))
+    beg_ind = end_ind
+    end_ind += 6300
 
   #for i in range(30):
   #  for ip, port in parse_ip.items():
