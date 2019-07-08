@@ -2,6 +2,7 @@
 from spoof_struct import send_packet
 import dpkt, socket, subprocess
 from collections import defaultdict
+import cPickle as pickle
 import time
 
 src_ip = ''
@@ -35,10 +36,13 @@ def parse_candidate(file_name):
 
 def main():
   parse_pcap(pcap_name)
-  f = open("target_measure.txt","w+")
-  for ip, id_list in ipid_map.iteritems():
-    f.write("ip: "+ip+" id: "+str(id_list)+"\n")
+  f = open( "save.p", "wb" ) 
+  pickle.dump( ipid_map, f)
   f.close()
+  #f = open("target_measure.txt","w+")
+  #for ip, id_list in ipid_map.iteritems():
+  #  f.write("ip: "+ip+" id: "+str(id_list)+"\n")
+  #f.close()
 
 
 if __name__ == "__main__":
