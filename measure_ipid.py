@@ -1,13 +1,14 @@
 #!/usr/bin/python
 from spoof_struct import send_packet
-import socket, subprocess
+import dpkt, socket, subprocess
+from collections import defaultdict
 import time
 
 src_ip = '192.168.100.128'
 spoof_ip = ''
 src_port = 54024
 pcap_name = "filter.pcap"
-ipid_map={}
+ipid_map=defaultdict(lambda:[])
 
 
 def parse_pcap(file_n):
@@ -29,6 +30,7 @@ def parse_candidate(file_name):
   content = f.readlines()
   f.close()
   filter_list = [tuple(x.rstrip('\n').split(':')) for x in content]
+  filter_list = [ (x[0],int(x[1])) for x in filter_list if x[1] != 'None']
   return filter_list
 
 def main():
