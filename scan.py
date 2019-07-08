@@ -22,7 +22,7 @@ def parse_pcap(file_n,port):
     tcp = ip.data
     if eth.type == dpkt.ethernet.ETH_TYPE_IP and tcp.dport == src_port and tcp.sport == port:
       result.append(socket.inet_ntoa(ip.src))
-    else
+    elif socket.inet_ntoa(ip.src) != src_ip:
       print("*************potential abnormal behavior*********")
       print(socket.inet_ntoa(ip.src))
       print(tcp.sport)
@@ -49,9 +49,9 @@ def main():
       for ip in rem_ip:
         send_packet(src_ip,src_port,ip,curr_port,1,1)
       #TODO parse cpk package and remove ip from list_b
-      time.sleep(2)
+      time.sleep(1)
       p.send_signal(subprocess.signal.SIGTERM)
-      time.sleep(2)
+      time.sleep(1)
       ip_res = parse_pcap(pcap_name,curr_port)
       print(ip_res)
       rem_ip = [x for x in rem_ip if x not in ip_res]
@@ -59,6 +59,8 @@ def main():
       result += result_temp
     else:
       result_temp = [(x,None) for x in rem_ip]
+      result += result_temp
+      rem_ip=[]
   f = open("result_prob.txt","w+")
   for ip, port in result:
     f.write(str(ip)+":"+str(port)+"\n")
