@@ -38,7 +38,7 @@ def main():
   ipid_map = parse_candidate("save.p")
   f1 = open("not_found","w+")
   f2 = open("diff_port","w+")
-  for ip,port in parse_ip:
+  for ip,port in parse_ip.items():
     if ip not in ipid_map:
       f1.write(ip+"\n")
     elif port != ipid_map[ip][0]:
@@ -48,10 +48,10 @@ def main():
   f2.close()
 
   f3 = open("increment","w+")
-  for ip,lists in ipid_map:
-    result = [ j-i for i in lists[1:-1] for j in lists[2:] ]
-    if sum(result)/29>0:
-      f3.write("ip is: "ip+"\n"+str(result)+"\n")
+  for ip,lists in ipid_map.items():
+    result = [j-i for j, i in zip(lists[2:],lists[1:-1])]
+    if sum(result)/29>0 and sum(result)/29 < 6:
+      f3.write("ip is: "+ip+"\n"+str(result)+"\n")
   f3.close()
       
 
