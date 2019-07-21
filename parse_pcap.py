@@ -7,9 +7,9 @@ import time
 
 src_ip = ''
 spoof_ip = '192.168.0.221'
-src_port = 54024
-pcap_name = "filter.pcap"
-ipid_map=defaultdict(lambda:[])
+src_port = 54038
+pcap_name = "result.pcap"
+ipid_map={}
 
 
 def parse_pcap(file_n):
@@ -20,9 +20,16 @@ def parse_pcap(file_n):
     eth = dpkt.ethernet.Ethernet(buf)
     ip = eth.data
     tcp = ip.data
+    ip_convert=socket.inet_ntoa(ip.src)
     #src_addr = socket.inet_ntoa(ip.src)
-    if eth.type == dpkt.ethernet.ETH_TYPE_IP and tcp.dport == src_port: # and tcp.sport == port
-      ipid_map[socket.inet_ntoa(ip.src)].append(ip.id)
+    try:
+      if eth.type == dpkt.ethernet.ETH_TYPE_IP and tcp.dport == src_port: # and tcp.sport == port
+        if ip_convert in ipid_map:
+          ipid_map[ip_convert].append(ip.id)
+        else:
+          ipid_map[ip_convert] = [tcp.sport, ip.id]
+    except:
+      print("error: "+ip_convert)
   f.close()
   return
 
