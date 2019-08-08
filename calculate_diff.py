@@ -46,14 +46,15 @@ def main():
       f2.write("respond to ip: "+ip+ " port: "+str(ipid_map[ip][0])+"\n")
   f1.close()
   f2.close()
-
+  reflector_candidate = {}
   f3 = open("increment","w+")
   for ip,lists in ipid_map.items():
-    result = [j-i for j, i in zip(lists[2:],lists[1:-1])]
+    result = [j-i for j, i in zip(lists[3::2],lists[1:-2:2])]
+    timestamp = [j-i for j, i in zip(lists[4::2],lists[2:-1:2])]
     if sum(result)/29>0 and sum(result)/29 < 6:
       f3.write("ip is: "+ip+"\n"+str(result)+"\n")
   f3.close()
-      
+
 
 
   #for i in range(30):

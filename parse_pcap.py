@@ -26,8 +26,9 @@ def parse_pcap(file_n):
       if eth.type == dpkt.ethernet.ETH_TYPE_IP and tcp.dport == src_port: # and tcp.sport == port
         if ip_convert in ipid_map:
           ipid_map[ip_convert].append(ip.id)
+          ipid_map[ip_convert].append(ts)
         else:
-          ipid_map[ip_convert] = [tcp.sport, ip.id]
+          ipid_map[ip_convert] = [tcp.sport, ip.id, ts]
     except:
       print("error: "+ip_convert)
   f.close()
@@ -43,7 +44,7 @@ def parse_candidate(file_name):
 
 def main():
   parse_pcap(pcap_name)
-  f = open( "save.p", "wb" ) 
+  f = open( "save.p", "wb" )
   pickle.dump( ipid_map, f)
   f.close()
   #f = open("target_measure.txt","w+")
