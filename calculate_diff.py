@@ -46,15 +46,19 @@ def main():
       f2.write("respond to ip: "+ip+ " port: "+str(ipid_map[ip][0])+"\n")
   f1.close()
   f2.close()
+  f4 = open("cand","w+")
   reflector_candidate = {}
-  f3 = open("increment","w+")
   for ip,lists in ipid_map.items():
     result = [j-i for j, i in zip(lists[3::2],lists[1:-2:2])]
     timestamp = [j-i for j, i in zip(lists[4::2],lists[2:-1:2])]
-    if sum(result)/29>0 and sum(result)/29 < 6:
-      f3.write("ip is: "+ip+"\n"+str(result)+"\n")
-  f3.close()
 
+    if all(time > 0.8 for time in timestamp) and len(result) <= 29 and (sum(result)/len(result))>0 and (sum(result)/len(result)) < 6:
+      reflector_candidate[ip] = lists[0]
+      f4.write("respond to ip: "+ip)
+  f4.close()
+  f3 = open( "reflector_candidate.pickle", "wb" )
+  pickle.dump( reflector_candidate, f)
+  f3.close()
 
 
   #for i in range(30):
