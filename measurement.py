@@ -26,10 +26,10 @@ def main():
   
   for r_ip, r_port in reflector_ip:
     for b_ip, b_port in black_list_ip:
-      for i in range(5):
+      for i in range(3):
         send_packet(local_ip,local_port,r_ip,r_port,1,1)
         time.sleep(0.999925)
-      for i in range(5): 
+      for i in range(3): 
         send_packet(local_ip,local_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
