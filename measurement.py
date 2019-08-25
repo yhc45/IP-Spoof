@@ -19,15 +19,15 @@ def parse_candidate(file_name):
 def main():
   reflector_ip = parse_candidate("reflector_candidate.pickle")
   black_list_ip = parse_candidate("black_list.p")
-  1000_ref = take(1000,reflector_ip.iteritems())
-  50_b = take(50,black_list_ip.iteritems())
-  p = subprocess.Popen(['tcpdump', '-s','0', '-i', 'ens33',
-       '-w', pcap_name, "port", str(src_port)], stdout=subprocess.PIPE)
+  ref_1000 = list(itertools.islice(reflector_ip.iteritems(),1000))
+  b_50 = list(itertools.islice(black_list_ip.iteritems(),50))
+  p = subprocess.Popen(['tcpdump', '-s','0', '-i', 'eno2',
+       '-w', pcap_name, "port", str(local_port)], stdout=subprocess.PIPE)
   time.sleep(2)
   timestamps = []
   
-  for r_ip, r_port in reflector_ip:
-    for b_ip, b_port in black_list_ip:
+  for r_ip, r_port in ref_1000:
+    for b_ip, b_port in b_50:
       for i in range(3):
         send_packet(local_ip,local_port,r_ip,r_port,1,1)
         time.sleep(0.999925)
