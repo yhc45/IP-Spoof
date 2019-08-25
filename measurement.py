@@ -17,8 +17,10 @@ def parse_candidate(file_name):
   return db
 
 def main():
-  reflector_ip = parse_candidate("reflector.pickle")
-  black_list_ip = parse_candidate("black_list.pickle")
+  reflector_ip = parse_candidate("reflector_candidate.pickle")
+  black_list_ip = parse_candidate("black_list.p")
+  1000_ref = take(1000,reflector_ip.iteritems())
+  50_b = take(50,black_list_ip.iteritems())
   p = subprocess.Popen(['tcpdump', '-s','0', '-i', 'ens33',
        '-w', pcap_name, "port", str(src_port)], stdout=subprocess.PIPE)
   time.sleep(2)
@@ -38,7 +40,7 @@ def main():
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
         time.sleep(0.9998061)
   p.send_signal(subprocess.signal.SIGTERM)
-  time.sleep(1)
+  time.sleep(2)
 
 if __name__ == "__main__":
   main()
