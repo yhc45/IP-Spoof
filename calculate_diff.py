@@ -52,13 +52,14 @@ def main():
     result = [j-i for j, i in zip(lists[3::2],lists[1:-2:2])]
     timestamp = [j-i for j, i in zip(lists[4::2],lists[2:-1:2])]
 
-    if all(time > 0.8 for time in timestamp) and len(result) <= 29 and (sum(result)/len(result))>0 and (sum(result)/len(result)) < 6:
+    if all(time > 0.8 for time in timestamp) and len(result) <= 29 and len(result) >20 and (sum(result)/len(result))>0 and (sum(result)/len(result)) < 6:
       reflector_candidate[ip] = lists[0]
       f4.write("respond to ip: "+ip)
   f4.close()
   f3 = open( "reflector_candidate.pickle", "wb" )
-  pickle.dump( reflector_candidate, f)
+  pickle.dump( reflector_candidate, f3)
   f3.close()
+  print(reflector_candidate)
 
 
   #for i in range(30):
