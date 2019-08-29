@@ -8,7 +8,7 @@ import itertools
 
 #will be changed when running the test
 local_ip = '1.1.1.1'
-local_port = 54024
+local_port = 56577
 pcap_name = "measure.pcap"
 
 def parse_candidate(file_name):
@@ -25,20 +25,20 @@ def main():
        '-w', pcap_name, "port", str(local_port)], stdout=subprocess.PIPE)
   time.sleep(2)
   timestamps = []
-  
-  for r_ip, r_port in ref_1000:
-    for b_ip, b_port in b_50:
-      for i in range(3):
+  for i in range(3):
+    for r_ip, r_port in ref_1000:
+      send_packet(local_ip,local_port,r_ip,r_port,1,1)
+    time.sleep(0.98)
+  for b_ip, b_port in b_50:
+    for i in range(3):
+      for r_ip, r_port in ref_1000:
         send_packet(local_ip,local_port,r_ip,r_port,1,1)
-        time.sleep(0.999925)
-      for i in range(3): 
-        send_packet(local_ip,local_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
         send_packet(b_ip,b_port,r_ip,r_port,1,1)
-        time.sleep(0.9998061)
+      time.sleep(0.912758)
   p.send_signal(subprocess.signal.SIGTERM)
   time.sleep(2)
 
