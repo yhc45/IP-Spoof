@@ -92,6 +92,7 @@ cursor.execute('\
 
 #iterate through files
 for root, dirs, files in os.walk('json_data/',topdown=True):
+  dirs.sort()
   for stuff in sorted(files):
     date, _, _, cat, _, _ = stuff.split('_')
 
