@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import json, gzip
 import os
 import sqlite3
@@ -99,5 +100,6 @@ for root, dirs, files in os.walk('json_data/',topdown=True):
       parse_drop(json_file,date)
     elif cat == 'EDROP':
       parse_edrop(json_file,date)
+    json_file.close()
 
 db.close()
