@@ -57,7 +57,7 @@ def parse_edrop(file_name,date_i):
   for removed in removed_from_list:
     cursor.execute('\
       UPDATE ip_table\
-      SET edrop= (SELECT ddrop FROM ip_table WHERE ip_address={tn}) || {date}\
+      SET edrop= (SELECT edrop FROM ip_table WHERE ip_address={tn}) || {date}\
       WHERE ip_address={tn}\
             '.format(tn='\''+removed+'\'',date='\'-'+date_i+'\''))
 
@@ -71,7 +71,7 @@ def parse_edrop(file_name,date_i):
   for new in new_to_list:
     cursor.execute('\
       UPDATE ip_table\
-      SET edrop= (SELECT ddrop FROM ip_table WHERE ip_address={tn}) || {date}\
+      SET edrop= (SELECT edrop FROM ip_table WHERE ip_address={tn}) || {date}\
       WHERE ip_address={tn}\
             '.format(tn='\''+new+'\'',date='\'S'+date_i+'\''))
 
@@ -91,7 +91,7 @@ cursor.execute('\
   ')
 
 #iterate through files
-for root, dirs, files in os.walk('json_data/',topdown=True):
+for root, dirs, files in os.walk('json_file/',topdown=True):
   dirs.sort()
   for stuff in sorted(files):
     date, _, _, cat, _, _ = stuff.split('_')
