@@ -5,12 +5,15 @@ import sqlite3
 
 drop_prev = set([])
 drop_next =  set([])
+drop_end_date = ""
 edrop_prev = set([])
 edrop_next =  set([])
+edrop_end_date = ""
 
 def parse_drop(file_name,date_i):
   global drop_prev
   global drop_next
+  global drop_end_date
 
   parsed = json.load(file_name)
   drop_next = set([])
@@ -22,13 +25,13 @@ def parse_drop(file_name,date_i):
       UPDATE ip_table\
       SET ddrop= (SELECT ddrop FROM ip_table WHERE ip_address={tn}) || {date}\
       WHERE ip_address={tn}\
-            '.format(tn='\''+removed+'\'',date='\'-'+date_i+'\''))
+            '.format(tn='\''+removed+'\'',date='\'-'+drop_end_date+'\''))
 
     cursor.execute('\
       INSERT INTO ip_table(ip_address,edrop,ddrop)\
       SELECT {tn}, \'\', {date}\
       WHERE (Select Changes() = 0)\
-            '.format(tn='\''+removed+'\'',date='\'-'+date_i+'\''))
+            '.format(tn='\''+removed+'\'',date='\'-'+drop_end_date+'\''))
 
   new_to_list = drop_next - drop_prev
   for new in new_to_list:
@@ -44,10 +47,12 @@ def parse_drop(file_name,date_i):
       WHERE (SELECT Changes()=0) \
             '.format(tn='\''+new+'\'',date='\'S'+date_i+'\''))
   drop_prev=drop_next
+  drop_end_date = date_i
 
 def parse_edrop(file_name,date_i):
   global edrop_prev
   global edrop_next
+  global edrop_end_date
 
   parsed = json.load(file_name)
   edrop_next = set([])
@@ -59,13 +64,13 @@ def parse_edrop(file_name,date_i):
       UPDATE ip_table\
       SET edrop= (SELECT edrop FROM ip_table WHERE ip_address={tn}) || {date}\
       WHERE ip_address={tn}\
-            '.format(tn='\''+removed+'\'',date='\'-'+date_i+'\''))
+            '.format(tn='\''+removed+'\'',date='\'-'+edrop_end_date+'\''))
 
     cursor.execute('\
       INSERT INTO ip_table(ip_address,edrop,ddrop)\
       SELECT {tn}, {date}, \'\'\
       WHERE (Select Changes() = 0)\
-            '.format(tn='\''+removed+'\'',date='\'-'+date_i+'\''))
+            '.format(tn='\''+removed+'\'',date='\'-'+edrop_end_date+'\''))
 
   new_to_list = edrop_next - edrop_prev
   for new in new_to_list:
@@ -81,6 +86,7 @@ def parse_edrop(file_name,date_i):
       WHERE (Select Changes() = 0)\
             '.format(tn='\''+new+'\'',date='\'S'+date_i+'\''))
   edrop_prev=edrop_next
+  edrop_end_date = date_i
 
 db = sqlite3.connect('mydb',isolation_level=None)
 
